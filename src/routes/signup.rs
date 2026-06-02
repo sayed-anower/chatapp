@@ -39,7 +39,8 @@ pub async fn signup(
     }
 
     // Generate 6-digit OTP
-    let otp = otp_service.generate_otp(&data.email, 6).await;
+    let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
+
     
     // Hash the password before temporarily saving to Redis
     let hashed_pwd = crypto.hash_data(&data.pwd).await.unwrap();
@@ -55,16 +56,16 @@ pub async fn signup(
     // Redis connection
     let conn = redis.get_connection().await.expect("Redis Failed!");
     
-    let temp_user_json = serde_json::to_string(&temp_user).expect("Failed to serialize");
-    
+    let signup_json = serde_json::to_string(&temp_user).expect("Failed to serialize");
     // Save to Redis with 300s (5m) TTL
-    let _ = conn.set_ex(&redis_key, &temp_user_json, 300).await.expect("Signup Failed!");
+
+    let _ = conn.set_ex(&redis_key, signup_json, self.config.ttl_secs).await;
 
     // Send Email
     let email_data = EmailData {
         to: data.email,
         subject: "Verify Your Account".to_string(),
-        body: verification_email("My Company", &data.otp, &data.name, 5),
+        body: verification_email("My Company", &otp, &data.name, 5),
     };
 
     match email_service.send_email(&email_data).await {

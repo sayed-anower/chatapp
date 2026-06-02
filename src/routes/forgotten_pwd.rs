@@ -40,7 +40,7 @@ pub async fn forgotten_pwd(
         return http_bad("If this email exists, an OTP has been sent."); // Good practice to prevent email enumeration
     }
 
-    let otp = otp_service.generate_otp(&data.email, 6);
+    let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
     
     // Hash the new requested password
     let hashed_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
@@ -55,7 +55,7 @@ pub async fn forgotten_pwd(
     let email_data = EmailData {
         to: data.email,
         subject: "Password Reset OTP".to_string(),
-        body: verification_email("My Company", &data.otp, "User", 5),
+        body: verification_email("My Company", &otp, "User", 5),
     };
 
     match email_service.send_email(&email_data).await {

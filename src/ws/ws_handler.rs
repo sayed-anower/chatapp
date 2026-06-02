@@ -39,7 +39,7 @@ async fn handle_client_command(
         }
         ClientCommand::DropRoom { room } => {
             // Drop room requirement: Print all messages of the room before dropping it
-            let messages = ws_manager.get_room_msgs(&room.clone());
+            let messages = ws_manager.get_room_msgs(&room).await.expect("Error fetching messages");
             println!("--- History for Room [{}] before drop ---", room);
             for msg in messages {
                 println!("{:?}", msg);
@@ -53,7 +53,7 @@ async fn handle_client_command(
         }
         ClientCommand::MsgRoom { room, msg } => {
             let user_msg = UserMsg::new(user_id.to_string(), room, msg);
-            ws_manager.msg_room(&room, user_msg.to_string());
+            ws_manager.msg_room(&room, format!("{:?}", user_msg));
         }
         ClientCommand::Broadcast { msg } => {
             ws_manager.broadcast(msg);
@@ -111,7 +111,7 @@ async fn ws_handler(
     });
 
     // Task 2: Inbound Loop (Read from WS client and route commands)
-    tokio::spawn(async move {
+    actix_web::rt::spawn(async move {
         while let Some(Ok(msg)) = msg_stream.next().await {
             match msg {
                 Message::Text(text) => {

@@ -27,7 +27,9 @@ pub async fn verify_signup(
     let redis_key = format!("signup:{}", data.email);
 
     // Fetch pending user data from Redis
-    let signup_data: Option<TempSignup> = conn.get(&redis_key).await.unwrap_or(None);
+    let signup_json: Option<String> = conn.get(&redis_key).await.unwrap_or(None);
+    let signup_data: Option<TempSignup> = signup_json
+    .and_then(|json_str| serde_json::from_str(&json_str).ok());
     
     if let Some(user) = signup_data {
         if otp_service.verify_otp(&user.email, &data.otp).await.unwrap() {
