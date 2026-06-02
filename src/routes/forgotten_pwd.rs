@@ -6,7 +6,7 @@ use crate::{
         verification_email,
     },
 };
-use fr_rust::redis::AsyncCommands::get;
+use fr_rust::redis::AsyncCommands;
 
 use actix_web::{post, web::{
     Data as AppData,
@@ -23,7 +23,7 @@ pub struct ForgottenPwd {
 }
 
 #[post("/forgotten-pwd")]
-pub async fn forgotten_pwd(
+pub async fn forgotten_pwd<RV>(
     pool: AppData<DbPool>,
     email_service: AppData<EmailService>,
     crypto: AppData<CryptoService>,
