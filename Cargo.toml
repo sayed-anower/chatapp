@@ -4,7 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fr-rust = {
-    version = "0.1.0",
-    features = ["full", "dep:actix-web", "dep:actix-multipart", "dep:actix-files", "dep:futures-util", "web", "dep:actix-ws", ]
-}
+fr-rust = { version = "0.1.0", features = ["full"] } 
