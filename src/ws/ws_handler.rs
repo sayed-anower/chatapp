@@ -52,7 +52,7 @@ async fn handle_client_command(
             ws_manager.msg_user(&target_id, msg);
         }
         ClientCommand::MsgRoom { room, msg } => {
-            let user_msg = UserMsg::new(user_id.to_string(), room, msg);
+            let user_msg = UserMsg::new(user_id.to_string(), room.clone(), msg);
             ws_manager.msg_room(&room, user_msg);
         }
         ClientCommand::Broadcast { msg } => {

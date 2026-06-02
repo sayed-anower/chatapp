@@ -6,7 +6,7 @@ use crate::{
         verification_email,
     },
 };
-use fr_rust::redis::AsyncCommands;
+use fr_rust::redis::AsyncCommands::get;
 
 use actix_web::{post, web::{
     Data as AppData,
@@ -49,7 +49,7 @@ pub async fn forgotten_pwd(
     let fpwd_data: Option<ForgottenPwd> = fpwd_json
     .and_then(|json_str| serde_json::from_str(&json_str).ok());
     let fpwd_json = serde_json::to_string(&fpwd_data).expect("Failed to serialize");
-    let _ = conn.set_ex(&redis_key, fpwd_json, 300).await;
+    let _: Result<RV, _> = conn.set_ex(&redis_key, fpwd_json, 300).await;
 
     let email_data = EmailData {
         to: data.email,

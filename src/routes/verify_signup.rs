@@ -23,7 +23,7 @@ pub async fn verify_signup(
 ) -> Rsp {
     let data = payload.into_inner();
     // Redis connection
-    let conn = redis.get_connection().await.expect("Redis Failed!");
+    let mut conn = redis.get_connection().await.expect("Redis Failed!");
     let redis_key = format!("signup:{}", data.email);
 
     // Fetch pending user data from Redis
