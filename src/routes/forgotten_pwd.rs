@@ -1,20 +1,12 @@
 use fr_rust::prelude::*;
-
-use crate::{
-    utils::{
-        if_user_exist,
-        verification_email,
-    },
-};
 use fr_rust::redis::AsyncCommands;
-
-use actix_web::{post, web::{
-    Data as AppData,
-    Json
-}};
-
+use actix_web::{post, web::{Data as AppData, Json}};
 use serde::{Deserialize, Serialize};
-use futures_util::StreamExt; 
+
+// Assuming these come from your internal crates/modules
+use crate::{
+    utils::{if_user_exist, verification_email},
+};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ForgottenPwd {
@@ -23,7 +15,7 @@ pub struct ForgottenPwd {
 }
 
 #[post("/forgotten-pwd")]
-pub async fn forgotten_pwd<RV>(
+pub async fn forgotten_pwd(
     pool: AppData<DbPool>,
     email_service: AppData<EmailService>,
     crypto: AppData<CryptoService>,
@@ -33,11 +25,11 @@ pub async fn forgotten_pwd<RV>(
 ) -> Rsp {
     let data = payload.into_inner();
     
-    // Redis connection
-    let conn = redis.get_connection().await.expect("Redis Failed!");
+    // Added 'mut' because Redis AsyncCommands require a mutable reference
+    let mut conn = redis.get_connection().await.expect("Redis Failed!");
     
     if !if_user_exist(&pool, &data.email).await {
-        return http_bad("If this email exists, an OTP has been sent."); // Good practice to prevent email enumeration
+        return http_bad("If this email exists, an OTP has been sent."); 
     }
 
     let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
@@ -45,11 +37,17 @@ pub async fn forgotten_pwd<RV>(
     // Hash the new requested password
     let redis_key = format!("fpwd:{}", data.email);
     let hashed_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
-    let fpwd_json: Option<String> = conn.get(&redis_key).await.unwrap_or(None);
-    let fpwd_data: Option<ForgottenPwd> = fpwd_json
-    .and_then(|json_str| serde_json::from_str(&json_str).ok());
-    let fpwd_json = serde_json::to_string(&fpwd_data).expect("Failed to serialize");
-    let _: Result<RV, _> = conn.set_ex(&redis_key, fpwd_json, 300).await;
+
+    // Store the user's email and their NEW HASHED password in Redis
+    let pending_reset = ForgottenPwd {
+        email: data.email.clone(),
+        new_pwd: hashed_pwd,
+    };
+
+    let fpwd_json = serde_json::to_string(&pending_reset).expect("Failed to serialize");
+    
+    // Fixed Redis set syntax and type specification
+    let _: Result<(), _> = conn.set_ex(&redis_key, fpwd_json, 300).await;
 
     let email_data = EmailData {
         to: data.email,
@@ -62,4 +60,3 @@ pub async fn forgotten_pwd<RV>(
         Err(_) => http_bad("Failed to send OTP email."),
     }
 }
-
