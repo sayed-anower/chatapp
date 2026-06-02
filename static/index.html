@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatapp</title>
+    <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box; outline: none;
+    }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            max-width: 50%;
+            height: 90vh;
+            overflow-y: auto;
+        }
+        h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-top: 0; }
+        .form-group {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+        .form-group h4 { margin: 0 0 10px 0; color: #0056b3; }
+        input, button {
+            padding: 8px;
+            margin: 4px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 18px);
+        }
+        button {
+            background: #0056b3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover { background: #004494; }
+        .ws-row { display: flex; gap: 10px; }
+        .ws-row input { width: 50%; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #222;
+            color: #0f0;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="panel">
+        <h2>HTTP Auth Routes</h2>
+        <label>Base API URL:</label>
+        <input type="text" id="apiUrl" value="/" placeholder="http://localhost:8080">
+
+        <div class="form-group">
+            <h4>Signup (/signup)</h4>
+            <input type="text" id="su_name" placeholder="Name">
+            <input type="email" id="su_email" placeholder="Email">
+            <input type="password" id="su_pwd" placeholder="Password">
+            <button onclick="testRest('signup', { name: su_name.value, email: su_email.value, pwd: su_pwd.value })">Test Signup</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Verify Signup (/verify-signup)</h4>
+            <input type="email" id="vsu_email" placeholder="Email">
+            <input type="text" id="vsu_otp" placeholder="OTP (String)">
+            <button onclick="testRest('verify-signup', { email: vsu_email.value, otp: vsu_otp.value })">Verify Signup</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Login (/login)</h4>
+            <input type="email" id="log_email" placeholder="Email">
+            <input type="password" id="log_pwd" placeholder="Password">
+            <button onclick="testRest('login', { email: log_email.value, pwd: log_pwd.value })">Test Login</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Change Password (/change-pwd)</h4>
+            <input type="email" id="cp_email" placeholder="Email">
+            <input type="password" id="cp_old" placeholder="Old Password">
+            <input type="password" id="cp_new" placeholder="New Password">
+            <button onclick="testRest('change-pwd', { email: cp_email.value, old_pwd: cp_old.value, new_pwd: cp_new.value })">Change Password</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Forgotten Password (/forgotten-pwd)</h4>
+            <input type="email" id="fp_email" placeholder="Email">
+            <input type="password" id="fp_new" placeholder="New Password">
+            <button onclick="testRest('forgotten-pwd', { email: fp_email.value, new_pwd: fp_new.value })">Request Reset</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Verify Forgotten Password (/verify-fpwd)</h4>
+            <input type="email" id="vfp_email" placeholder="Email">
+            <input type="text" id="vfp_otp" placeholder="OTP (String)">
+            <button onclick="testRest('verify-fpwd', { email: vfp_email.value, otp: vfp_otp.value })">Verify Reset</button>
+        </div>
+
+        <h4>API Response</h4>
+        <textarea id="apiLog" readonly></textarea>
+    </div>
+
+    <div class="panel">
+        <h2>WebSocket Tester</h2>
+        <label>WebSocket URL:</label>
+        <div class="ws-row">
+            <input type="text" id="wsUrl" value="ws://localhost:8080/ws/test_user_1" placeholder="ws://localhost:8080/ws/user_id">
+            <button id="wsConnectBtn" onclick="toggleWs()" style="margin: 4px 0;">Connect</button>
+        </div>
+
+        <div class="form-group">
+            <h4>Room Management</h4>
+            <div class="ws-row">
+                <input type="text" id="roomName" placeholder="Room Name">
+            </div>
+            <div class="ws-row">
+                <button onclick="sendWs({ action: 'join', room: roomName.value })">Join</button>
+                <button onclick="sendWs({ action: 'leave', room: roomName.value })" style="background: #e68a00;">Leave</button>
+                <button onclick="sendWs({ action: 'drop_room', room: roomName.value })" style="background: #dc3545;">Drop Room</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <h4>Messaging</h4>
+            
+            <label>Send to Room</label>
+            <div class="ws-row">
+                <input type="text" id="msgRoomName" placeholder="Room Name">
+                <input type="text" id="msgRoomText" placeholder="Message Body">
+            </div>
+            <button onclick="sendWs({ action: 'msg_room', room: msgRoomName.value, msg: msgRoomText.value })">Msg Room</button>
+
+            <label style="display:block; margin-top:10px;">Send to User</label>
+            <div class="ws-row">
+                <input type="text" id="msgTargetId" placeholder="Target User ID">
+                <input type="text" id="msgUserText" placeholder="Message Body">
+            </div>
+            <button onclick="sendWs({ action: 'msg_user', target_id: msgTargetId.value, msg: msgUserText.value })">Msg User</button>
+
+            <label style="display:block; margin-top:10px;">Broadcast</label>
+            <input type="text" id="broadcastText" placeholder="Message to everyone">
+            <button onclick="sendWs({ action: 'broadcast', msg: broadcastText.value })">Broadcast All</button>
+        </div>
+
+        <h4>WebSocket Log</h4>
+        <textarea id="wsLog" readonly></textarea>
+    </div>
+
+    <script>
+        // --- REST API Logic ---
+        async function testRest(endpoint, payload) {
+            const baseUrl = document.getElementById('apiUrl').value.replace(/\/$/, "");
+            const logArea = document.getElementById('apiLog');
+            logArea.value = `POST /${endpoint}\nPayload: ${JSON.stringify(payload, null, 2)}\nSending...\n`;
+            
+            try {
+                const response = await fetch(`${baseUrl}/${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const text = await response.text();
+                let displayData = text;
+                try { displayData = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+
+                logArea.value += `\nStatus: ${response.status}\nResponse:\n${displayData}`;
+            } catch (err) {
+                logArea.value += `\nError: ${err.message}`;
+            }
+        }
+
+        // --- WebSocket Logic ---
+        let ws = null;
+
+        function logWs(msg) {
+            const logArea = document.getElementById('wsLog');
+            const time = new Date().toLocaleTimeString();
+            logArea.value = `[${time}] ${msg}\n` + logArea.value;
+        }
+
+        function toggleWs() {
+            const btn = document.getElementById('wsConnectBtn');
+            const url = document.getElementById('wsUrl').value;
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            } else {
+                logWs("Connecting to " + url + "...");
+                ws = new WebSocket(url);
+
+                ws.onopen = () => {
+                    logWs("CONNECTED");
+                    btn.innerText = "Disconnect";
+                    btn.style.background = "#dc3545";
+                };
+
+                ws.onmessage = (e) => {
+                    logWs("RECEIVED: " + e.data);
+                };
+
+                ws.onclose = () => {
+                    logWs("DISCONNECTED");
+                    btn.innerText = "Connect";
+                    btn.style.background = "#0056b3";
+                    ws = null;
+                };
+
+                ws.onerror = (err) => {
+                    logWs("ERROR: See console for details");
+                    console.error("WS Error:", err);
+                };
+            }
+        }
+
+        function sendWs(payload) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert("WebSocket is not connected!");
+                return;
+            }
+            const data = JSON.stringify(payload);
+            ws.send(data);
+            logWs("SENT: " + data);
+        }
+    </script>
+</body>
+</html>
