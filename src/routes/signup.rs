@@ -54,7 +54,7 @@ pub async fn signup(
     let redis_key = format!("signup:{}", temp_user.email);
     
     // Redis connection
-    let conn = redis.get_connection().await.expect("Redis Failed!");
+    let mut conn = redis.get_connection().await.expect("Redis Failed!");
     
     let signup_json = serde_json::to_string(&temp_user).expect("Failed to serialize");
     // Save to Redis with 300s (5m) TTL
