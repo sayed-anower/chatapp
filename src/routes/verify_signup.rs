@@ -1,5 +1,5 @@
 use fr_rust::prelude::*;
-use fr_rust::redis::AsyncCommands
+use fr_rust::redis::AsyncCommands;
 use actix_web::{post, web::{
     Data as AppData,
     Json
@@ -30,7 +30,7 @@ pub async fn verify_signup(
     let signup_data: Option<TempSignup> = conn.get(&redis_key).await.unwrap_or(None);
     
     if let Some(user) = signup_data {
-        if otp_service.verify_otp(&user.email, &data.otp).await {
+        if otp_service.verify_otp(&user.email, &data.otp).await.unwrap() {
             // Save verified user in DB
             let _ = pool.execute(
                 "INSERT INTO users (name, email, pwd) VALUES ($1, $2, $3)",

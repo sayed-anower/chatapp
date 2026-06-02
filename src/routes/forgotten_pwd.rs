@@ -6,7 +6,7 @@ use crate::{
         verification_email,
     },
 };
-use fr_rust::redis::AsyncCommands
+use fr_rust::redis::AsyncCommands;
 
 use actix_web::{post, web::{
     Data as AppData,
@@ -53,12 +53,12 @@ pub async fn forgotten_pwd(
     let _ = conn.set_ex(&redis_key, &fpwd_data, 300).await;
 
     let email_data = EmailData {
-        to: &data.email,
+        to: data.email,
         subject: "Password Reset OTP".to_string(),
-        body: verification_email("My Company", &otp, "User", 5),
+        body: verification_email("My Company", &data.otp, "User", 5),
     };
 
-    match email_service.send_email(email_data).await {
+    match email_service.send_email(&email_data).await {
         Ok(_) => http_ok("OTP sent to your email."),
         Err(_) => http_bad("Failed to send OTP email."),
     }

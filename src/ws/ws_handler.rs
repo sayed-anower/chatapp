@@ -46,13 +46,13 @@ async fn handle_client_command(
             }
             println!("-----------------------------------------");
             
-            ws_manager.drop_room(&_room);
+            ws_manager.drop_room(&room);
         }
         ClientCommand::MsgUser { target_id, msg } => {
             ws_manager.msg_user(&target_id, msg);
         }
         ClientCommand::MsgRoom { room, msg } => {
-            let user_msg = UserMsg::new(user_id, room, msg);
+            let user_msg = UserMsg::new(user_id.to_string(), room, msg);
             ws_manager.msg_room(&room, user_msg.to_string());
         }
         ClientCommand::Broadcast { msg } => {

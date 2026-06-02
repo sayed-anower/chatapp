@@ -1,5 +1,5 @@
 use fr_rust::prelude::*;
-use fr_rust::redis::AsyncCommands
+use fr_rust::redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
 use futures_util::StreamExt;
 use actix_web::{post, web::{
@@ -28,7 +28,7 @@ pub async fn verify_fpwd(
     let fpwd_data: Option<ForgottenPwd> = conn.get(&redis_key).await.unwrap_or(None);
     
     if let Some(fpwd) = fpwd_data {
-        if otp_service.verify_otp(&data.email, &data.otp) {
+        if otp_service.verify_otp(&data.email, &data.otp).await.unwrap() {
             // Update password in database
             let _ = pool.execute(
                 "UPDATE users SET pwd = $1 WHERE email = $2;",

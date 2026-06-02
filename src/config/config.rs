@@ -10,10 +10,8 @@ use crate::{
         change_pwd,
         verify_signup
     },
-    ws::{
-        ws_handler
-    }
 };
+use crate::ws::ws_handler::ws_handler;
 
 // App Configuration
 pub fn app_config(cfg: &mut web::ServiceConfig) {

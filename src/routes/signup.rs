@@ -64,7 +64,7 @@ pub async fn signup(
     let email_data = EmailData {
         to: data.email,
         subject: "Verify Your Account".to_string(),
-        body: verification_email("My Company", &otp, &data.name, 5),
+        body: verification_email("My Company", &data.otp, &data.name, 5),
     };
 
     match email_service.send_email(&email_data).await {

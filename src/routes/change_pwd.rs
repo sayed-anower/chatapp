@@ -4,7 +4,7 @@ use actix_web::{post, web::{
     Data as AppData,
     Json
 }};
-use fr_rust::redis::AsyncCommands
+use fr_rust::redis::AsyncCommands;
 
 use serde::{Deserialize, Serialize};
 use futures_util::StreamExt; 
