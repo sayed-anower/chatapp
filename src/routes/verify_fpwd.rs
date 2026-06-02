@@ -1,12 +1,12 @@
 use fr_rust::prelude::*;
 use fr_rust::redis::AsyncCommands;
+use actix_web::{post, web::{Data as AppData, Json}};
 use serde::{Deserialize, Serialize};
-use futures_util::StreamExt;
-use actix_web::{post, web::{
-    Data as AppData,
-    Json
-}, App};
-use crate::routes::ForgottenPwd;
+
+// Import the struct from your original route file
+use crate::routes::forgotten_pwd::ForgottenPwd; 
+
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {
     pub email: String,
@@ -21,29 +21,40 @@ pub async fn verify_fpwd(
     payload: Json<VerifyOtp>,
 ) -> Rsp {
     let data = payload.into_inner();
-    // Redis connection
-    let conn = redis.get_connection().await.expect("Redis Failed!");
+    
+    // 1. Made 'conn' mutable so Redis commands can execute
+    let mut conn = redis.get_connection().await.expect("Redis Failed!");
     let redis_key = format!("fpwd:{}", data.email);
     
-    let fpwd_data: Option<ForgottenPwd> = conn.get(&redis_key).await.unwrap_or(None);
+    // 2. Safely read as Option<String> from Redis
+    let fpwd_json: Option<String> = conn.get(&redis_key).await.ok();
+    
+    // 3. Convert the JSON String into your struct using Serde
+    let fpwd_data: Option<ForgottenPwd> = fpwd_json
+        .and_then(|json_str| serde_json::from_str(&json_str).ok());
     
     if let Some(fpwd) = fpwd_data {
-        if otp_service.verify_otp(&data.email, &data.otp).await.unwrap() {
-            // Update password in database
-            let _ = pool.execute(
-                "UPDATE users SET pwd = $1 WHERE email = $2;",
-                &[&fpwd.new_pwd, &data.email]
-            ).await;
-            
-            // Clean up Redis
-            let _ = conn.del(&redis_key).await.unwrap();
+        // 4. Verify the user input against the OTP service
+        match otp_service.verify_otp(&data.email, &data.otp).await {
+            Ok(true) => {
+                // 5. Update password in the database
+                let update_result = pool.execute(
+                    "UPDATE users SET pwd = $1 WHERE email = $2;",
+                    &[&fpwd.new_pwd, &data.email]
+                ).await;
 
-            http_ok("Password reset successfully!")
-        } else {
-            http_bad("Invalid or expired OTP.")
+                if update_result.is_err() {
+                    return http_bad("Database update failed.");
+                }
+                
+                // 6. Clean up the used Redis session data
+                let _: Result<(), _> = conn.del(&redis_key).await;
+
+                http_ok("Password reset successfully!")
+            }
+            _ => http_bad("Invalid or expired OTP.")
         }
     } else {
         http_bad("Session expired. Please request a new password reset.")
     }
 }
-

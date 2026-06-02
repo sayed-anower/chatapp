@@ -41,7 +41,7 @@ pub async fn forgotten_pwd(
     // Store the user's email and their NEW HASHED password in Redis
     let pending_reset = ForgottenPwd {
         email: data.email.clone(),
-        new_pwd: hashed_pwd,
+        new_pwd: hashed_pwd.hash,
     };
 
     let fpwd_json = serde_json::to_string(&pending_reset).expect("Failed to serialize");
