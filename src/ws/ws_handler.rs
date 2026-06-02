@@ -32,10 +32,10 @@ async fn handle_client_command(
 
     match command {
         ClientCommand::Join { room } => {
-            ws_manager.join_room(user_id.to_string(), room);
+            ws_manager.join_room(user_id, room);
         }
         ClientCommand::Leave { room } => {
-            ws_manager.leave_room(user_id.to_string(), room);
+            ws_manager.leave_room(user_id, room);
         }
         ClientCommand::DropRoom { room } => {
             // Drop room requirement: Print all messages of the room before dropping it
@@ -84,7 +84,7 @@ async fn ws_handler(
     // Perform the WebSocket handshake
     let (session, mut msg_stream) = match actix_ws::handle(&req, body) {
         Ok(res) => res,
-        Err(e) => return ErrorResponse::internal_server_error(e.to_string()), 
+        Err(e) => return http_bad("Internl Server Error!"), 
     };
 
     // 2. Register User with the manager

@@ -1,7 +1,7 @@
 use fr_rust::prelude::*;
 
 // Check if user exists in the database
-async fn if_user_exist(pool: &DbPool, email: &str) -> bool {
+pub async fn if_user_exist(pool: &DbPool, email: &str) -> bool {
     let select_opt_query = "SELECT id FROM users WHERE email = $1;";
     match pool.query_opt(select_opt_query, &[&email]).await {
         Ok(Some(_)) => true,

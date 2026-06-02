@@ -13,6 +13,7 @@ use crate::{
     },
 };
 
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TempSignup {
     pub name: String,
@@ -53,16 +54,16 @@ pub async fn signup(
     let conn = redis.get_connection().await.expect("Redis Failed!");
 
     // Save to Redis with 300s (5m) TTL
-    let _ = con.set_ex(&redis_key, &temp_user, self.config.ttl_secs).await.expect("Login Failed!");
+    let _ = conn.set_ex(&redis_key, &temp_user, self.config.ttl_secs).await.expect("Login Failed!");
 
     // Send Email
     let email_data = EmailData {
-        to: &data.email,
+        to: data.email,
         subject: "Verify Your Account".to_string(),
         body: verification_email("My Company", &otp, &data.name, 5),
     };
 
-    match email_service.send_email(email_data).await {
+    match email_service.send_email(&email_data).await {
         Ok(_) => http_ok("Signup initiated. Please check your email for the OTP!"),
         Err(_) => http_bad("Failed to send verification email."),
     }

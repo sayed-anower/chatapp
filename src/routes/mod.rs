@@ -1,20 +1,16 @@
-pub mod index;
-pub use index::index;
+mod index;
+mod signup;
+mod login;
+mod verify_signup;
+mod forgotten_pwd;
+ mod verify_fpwd;
+ mod change_pwd;
 
-pub mod signup;
-pub use signup::signup;
-
-pub mod login;
-pub use login::login;
-
-pub mod verify_signup;
-pub use verify_signup::verify_signup;
-
-pub mod forgotten_pwd;
-pub use forgotten_pwd::forgotten_pwd;
-
-pub mod verify_fpwd;
-pub use verify_fpwd::change_pwd as verify_change_pwd; 
-
-pub mod change_pwd;
-pub use change_pwd::change_pwd;
+// Re-export everything inside them so they are accessible at this level
+pub use index::*;
+pub use signup::*;
+pub use login::*;
+pub use verify_signup::*;
+pub use forgotten_pwd::*;
+pub use verify_fpwd::*;
+pub use change_pwd::*;
