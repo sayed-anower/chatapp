@@ -3,7 +3,8 @@ use fr_rust::redis::AsyncCommands;
 use actix_web::{post, web::{
     Data as AppData,
     Json
-}, App};
+}
+};
 use crate::routes::TempSignup;
 use serde::{Deserialize, Serialize};
 use futures_util::StreamExt; 

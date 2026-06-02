@@ -2,7 +2,7 @@ use fr_rust::prelude::*;
  use actix_web::{post, web::{
     Data as AppData,
     Json
-}, App};
+}};
 
 use serde::{Deserialize, Serialize};
 
@@ -58,7 +58,7 @@ pub async fn signup(
     
     let signup_json = serde_json::to_string(&temp_user).expect("Failed to serialize");
     // Save to Redis with 300s (5m) TTL
-    let _: Result<(), _> = conn.set_ex(&redis_key, fpwd_json, 300).await;
+    let _: Result<(), _> = conn.set_ex(&redis_key, signup_json, 300).await;
 
     // Send Email
     let email_data = EmailData {
