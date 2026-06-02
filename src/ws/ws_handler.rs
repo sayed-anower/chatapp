@@ -1,12 +1,10 @@
 use fr_rust::prelude::{
-  *, actix_ws::{Message, Session, Stream},
-  futures_util::StreamExt,
-  tokio::sync::mpsc,
-  tokio::time::instant
+    *,
+    actix_ws::{Message, Session, stream},
+    futures_util::StreamExt,
+    tokio::sync::mpsc,
+    tokio::time::instant
 };
-
-use std::time::Duration;
-
 
 #[derive(Deserialize)]
 #[serde(tag = "action", rename_all = "snake_case")]
