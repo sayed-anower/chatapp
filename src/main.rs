@@ -3,7 +3,7 @@ use chatapp::app_config;
 use actix_web::{get, web, App, HttpServer};
 use actix_web::web::Data as AppData;
 
-#[fr_rust::main]
+#[actix_web::main]
 async fn main() -> MainRlt {
     // Load environment variables
     load_env();
