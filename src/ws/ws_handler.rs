@@ -3,7 +3,7 @@ use fr_rust::prelude::*;
 use actix_web::{get, web};
 use actix_web::web::Path; 
 
-use actix_ws::{Message, Session, MessageStream}; 
+use ::actix_ws::{Message, Session, MessageStream}; 
 
 use futures_util::StreamExt; 
 
@@ -32,28 +32,28 @@ async fn handle_client_command(
 
     match command {
         ClientCommand::Join { room } => {
-            ws_manager.join_room(user_id, room);
+            ws_manager.join_room(&user_id, &room);
         }
         ClientCommand::Leave { room } => {
-            ws_manager.leave_room(user_id, room);
+            ws_manager.leave_room(&user_id, &room);
         }
         ClientCommand::DropRoom { room } => {
             // Drop room requirement: Print all messages of the room before dropping it
-            let messages = ws_manager.get_room_msgs(room.clone());
+            let messages = ws_manager.get_room_msgs(&room.clone());
             println!("--- History for Room [{}] before drop ---", room);
             for msg in messages {
                 println!("{:?}", msg);
             }
             println!("-----------------------------------------");
             
-            ws_manager.drop_room(room);
+            ws_manager.drop_room(&_room);
         }
         ClientCommand::MsgUser { target_id, msg } => {
-            ws_manager.msg_user(target_id, msg);
+            ws_manager.msg_user(&target_id, msg);
         }
         ClientCommand::MsgRoom { room, msg } => {
-            let user_msg = UserMsg::new(user_id, &room, &msg);
-            ws_manager.msg_room(room, user_msg);
+            let user_msg = UserMsg::new(user_id, room, msg);
+            ws_manager.msg_room(&room, user_msg.to_string());
         }
         ClientCommand::Broadcast { msg } => {
             ws_manager.broadcast(msg);
@@ -66,7 +66,7 @@ async fn handle_client_command(
 fn cleanup_user(ws_manager: &WsManager, user_id: &str) {
     println!("Cleaning up connection for user: {}", user_id);
     // Explicitly drops the user and cleans up allocations from internal states/maps
-    ws_manager.drop_user(user_id.to_string());
+    ws_manager.drop_user(user_id);
 }
 
 #[get("/ws/{user_id}")]
@@ -82,13 +82,13 @@ async fn ws_handler(
     let (tx, mut rx) = mpsc::channel::<String>(128);
 
     // Perform the WebSocket handshake
-    let (session, mut msg_stream) = match actix_ws::handle(&req, body) {
-        Ok(res) => res,
-        Err(e) => return http_bad("Internl Server Error!"), 
+    let (res, session, mut msg_stream) = match actix_ws::handle(&req, body) {
+        Ok(tuple) => tuple,
+        Err(e) => return http_bad("Internal Server Error!"), 
     };
 
     // 2. Register User with the manager
-    ws_manager.register(user_id.clone(), tx);
+    ws_manager.register(&user_id.clone(), tx);
 
     // Clone manager, user_id, and session for the tasks
     let ws_manager_outbound = ws_manager.clone();

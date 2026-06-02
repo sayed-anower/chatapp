@@ -1,10 +1,10 @@
-mod index;
-mod signup;
-mod login;
-mod verify_signup;
-mod forgotten_pwd;
- mod verify_fpwd;
- mod change_pwd;
+pub mod index;
+pub mod signup;
+pub mod login;
+pub mod verify_signup;
+pub mod forgotten_pwd;
+pub mod verify_fpwd;
+pub mod change_pwd;
 
 // Re-export everything inside them so they are accessible at this level
 pub use index::*;

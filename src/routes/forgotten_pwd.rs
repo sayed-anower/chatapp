@@ -6,6 +6,7 @@ use crate::{
         verification_email,
     },
 };
+use fr_rust::redis::AsyncCommands
 
 use actix_web::{post, web::{
     Data as AppData,

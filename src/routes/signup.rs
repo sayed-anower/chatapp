@@ -5,6 +5,7 @@ use fr_rust::prelude::*;
 }, App};
 
 use serde::{Deserialize, Serialize};
+
 use futures_util::StreamExt; 
 use crate::{
     utils::{
@@ -13,6 +14,7 @@ use crate::{
     },
 };
 
+use fr_rust::redis::AsyncCommands;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TempSignup {
@@ -37,7 +39,7 @@ pub async fn signup(
     }
 
     // Generate 6-digit OTP
-    let otp = otp_service.generate_otp(&data.email, 6);
+    let otp = otp_service.generate_otp(&data.email, 6).await;
     
     // Hash the password before temporarily saving to Redis
     let hashed_pwd = crypto.hash_data(&data.pwd).await.unwrap();
@@ -52,9 +54,11 @@ pub async fn signup(
     
     // Redis connection
     let conn = redis.get_connection().await.expect("Redis Failed!");
-
+    
+    let temp_user_json = serde_json::to_string(&temp_user).expect("Failed to serialize");
+    
     // Save to Redis with 300s (5m) TTL
-    let _ = conn.set_ex(&redis_key, &temp_user, self.config.ttl_secs).await.expect("Login Failed!");
+    let _ = conn.set_ex(&redis_key, &temp_user_json, 300).await.expect("Signup Failed!");
 
     // Send Email
     let email_data = EmailData {

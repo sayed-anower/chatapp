@@ -1,11 +1,12 @@
 use fr_rust::prelude::*;
+use fr_rust::redis::AsyncCommands
 use serde::{Deserialize, Serialize};
 use futures_util::StreamExt;
 use actix_web::{post, web::{
     Data as AppData,
     Json
 }, App};
-
+use crate::routes::ForgottenPwd;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {
     pub email: String,
