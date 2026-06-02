@@ -43,14 +43,13 @@ pub async fn forgotten_pwd(
     let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
     
     // Hash the new requested password
-    let hashed_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
-    let fpwd_data = ForgottenPwd {
-        email: data.email.clone(),
-        new_pwd: hashed_pwd.hash,
-    };
-
     let redis_key = format!("fpwd:{}", data.email);
-    let _ = conn.set_ex(&redis_key, &fpwd_data, 300).await;
+    let hashed_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
+    let fpwd_json: Option<String> = conn.get(&redis_key).await.unwrap_or(None);
+    let fpwd_data: Option<ForgottenPwd> = fpwd_json
+    .and_then(|json_str| serde_json::from_str(&json_str).ok());
+    let fpwd_json = serde_json::to_string(&fpwd_data).expect("Failed to serialize");
+    let _ = conn.set_ex(&redis_key, fpwd_json, 300).await;
 
     let email_data = EmailData {
         to: data.email,

@@ -40,7 +40,7 @@ pub async fn verify_signup(
             ).await;
             
             // Clean up Redis
-            let _ = conn.del(&redis_key).await.unwrap();
+            let _: usize = conn.del(&redis_key).await.unwrap();
 
             http_ok("Signup successful!")
         } else {
