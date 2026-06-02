@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fr-rust = { version = "0.1.0", git = "https://github.com", branch = "main" }
+fr-rust = { version = "0.1.0", git = "https://github.com/sayed-anower/fr-rust", branch = "main" }
