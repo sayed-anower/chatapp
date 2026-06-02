@@ -1,10 +1,11 @@
 use fr_rust::prelude::*;
+use actix_web::{web};
 use crate::{
     routes::{
         index_file,
         signup,
         login,
-        forgottten_pwd,
+        forgotten_pwd,
         verify_fpwd,
         change_pwd,
         verify_signup
@@ -15,7 +16,7 @@ use crate::{
 };
 
 // App Configuration
-pub fn app_config(cfg: &mut ServiceConfig) {
+pub fn app_config(cfg: &mut web::ServiceConfig) {
     cfg
        .service(index_file)
        .service(signup)

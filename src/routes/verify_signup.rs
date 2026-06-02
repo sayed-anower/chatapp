@@ -1,5 +1,13 @@
 use fr_rust::prelude::*;
 
+use actix_web::{post, web::{
+    Data as AppData,
+    Json
+}, App};
+
+use serde::{Deserialize, Serialize};
+use futures_util::StreamExt; 
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {
     pub email: String,

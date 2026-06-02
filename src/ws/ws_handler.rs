@@ -1,12 +1,18 @@
-use fr_rust::prelude::{
-    *,
-    actix_ws::{Message, Session, stream},
-    futures_util::StreamExt,
-    tokio::sync::mpsc,
-    tokio::time::instant
-};
 
-#[derive(Deserialize)]
+use fr_rust::prelude::*;
+use actix_web::{get, web};
+use actix_web::web::Path; 
+
+use actix_ws::{Message, Session, MessageStream}; 
+
+use futures_util::StreamExt; 
+
+use tokio::sync::mpsc; 
+use tokio::time::Instant; 
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "action", rename_all = "snake_case")]
 enum ClientCommand {
     Join { room: String },
@@ -67,7 +73,7 @@ fn cleanup_user(ws_manager: &WsManager, user_id: &str) {
 async fn ws_handler(
     req: Rqs,
     body: Payload,
-    ws_manager: AppData<WsManager>,
+    ws_manager: web::Data<WsManager>,
     path: Path<String>,
 ) -> Rsp {
     let user_id = path.into_inner();
@@ -78,26 +84,30 @@ async fn ws_handler(
     // Perform the WebSocket handshake
     let (session, mut msg_stream) = match actix_ws::handle(&req, body) {
         Ok(res) => res,
-        Err(e) => return ErrorResponse::internal_server_error(e.to_string()), // Adjust to fr_rust error handling
+        Err(e) => return ErrorResponse::internal_server_error(e.to_string()), 
     };
 
     // 2. Register User with the manager
     ws_manager.register(user_id.clone(), tx);
 
-    // Clone manager and user_id for the background write loop task
-    let ws_manager_clone = ws_manager.clone();
-    let user_id_clone = user_id.clone();
-    let mut session_clone = session.clone();
+    // Clone manager, user_id, and session for the tasks
+    let ws_manager_outbound = ws_manager.clone();
+    let user_id_outbound = user_id.clone();
+    let mut session_outbound = session.clone();
+
+    let ws_manager_inbound = ws_manager.clone();
+    let user_id_inbound = user_id.clone();
+    let mut session_inbound = session.clone(); // Cloned so 'session' ownership isn't lost
 
     // Task 1: Outbound Loop (Listen to the mpsc channel and push to the WS client)
     tokio::spawn(async move {
         while let Some(msg) = rx.recv().await {
-            if session_clone.text(msg).await.is_err() {
+            if session_outbound.text(msg).await.is_err() {
                 break; // Client disconnected, break loop to trigger cleanup
             }
         }
         // Cleanup if the outbound channel cuts off early
-        cleanup_user(&ws_manager_clone, &user_id_clone);
+        cleanup_user(&ws_manager_outbound, &user_id_outbound);
     });
 
     // Task 2: Inbound Loop (Read from WS client and route commands)
@@ -105,15 +115,12 @@ async fn ws_handler(
         while let Some(Ok(msg)) = msg_stream.next().await {
             match msg {
                 Message::Text(text) => {
-                    // Let's parse the text. Assuming a simple JSON string or command format.
-                    // For flexibility, let's assume incoming payloads look like a command:
-                    // e.g., {"cmd": "join", "room": "lobby"} or {"cmd": "msg_room", "room": "lobby", "text": "hi"}
-                    if let Err(e) = handle_client_command(&ws_manager, &user_id, &text).await {
-                        let _ = session.text(format!("Error parsing command: {}", e)).await;
+                    if let Err(e) = handle_client_command(&ws_manager_inbound, &user_id_inbound, &text).await {
+                        let _ = session_inbound.text(format!("Error parsing command: {}", e)).await;
                     }
                 }
                 Message::Ping(bytes) => {
-                    let _ = session.pong(&bytes).await;
+                    let _ = session_inbound.pong(&bytes).await;
                 }
                 Message::Close(_) => break, // Exit loop on close frame
                 _ => {}
@@ -121,7 +128,7 @@ async fn ws_handler(
         }
 
         // 3. User Disconnected - Run meticulous cleanup
-        cleanup_user(&ws_manager, &user_id);
+        cleanup_user(&ws_manager_inbound, &user_id_inbound);
     });
 
     http_ok("Ok!")

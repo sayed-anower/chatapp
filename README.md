@@ -18,4 +18,3 @@ To support horizontal scaling, the application relies on a **Message Broker (Red
 2. **Node A** processes the message and publishes it to a centralized Redis channel.
 3. **Node B** (along with all other active nodes) is subscribed to this channel and receives the broadcast.
 4. **Node B** identifies that the recipient is connected to its instance and pushes the message down their specific WebSocket connection.
-

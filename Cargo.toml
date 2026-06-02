@@ -5,3 +5,9 @@ edition = "2024"
 
 [dependencies]
 fr-rust = { version = "0.1.0", git = "https://github.com/sayed-anower/fr-rust", branch = "main" }
+actix-web = "4.13"
+actix-ws = "0.4"
+futures-util = "0.3"
+tokio = { version = "1.52", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+ serde_json = "1.0"

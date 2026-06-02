@@ -7,6 +7,14 @@ use crate::{
     },
 };
 
+use actix_web::{post, web::{
+    Data as AppData,
+    Json
+}};
+
+use serde::{Deserialize, Serialize};
+use futures_util::StreamExt; 
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ForgottenPwd {
     pub email: String,
