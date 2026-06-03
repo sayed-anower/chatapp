@@ -1,5 +1,4 @@
 use fr_rust::prelude::*;
-use deadpool_redis::redis::AsyncCommands;
 use actix_web::{web::Data as AppData, post, web::Json};
 
 use serde::{Serialize, Deserialize};

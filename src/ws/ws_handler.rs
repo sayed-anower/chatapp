@@ -78,7 +78,7 @@ async fn ws_handler(
     let (tx, mut rx) = mpsc::channel::<String>(128);
 
     // Perform WebSocket handshake
-    let (res, mut session, mut msg_stream) = match actix_ws::handle(&req, body) {
+    let (_res, mut session, mut msg_stream) = match actix_ws::handle(&req, body) {
         Ok(tuple) => tuple,
         Err(_) => return http_bad("Internal Server Error!"), 
     };
@@ -93,7 +93,7 @@ async fn ws_handler(
 
     // 3. Optimized Single Task Execution Loop
     // Merging inbound and outbound handling prevents spawning 2 tasks per user, saving memory and CPU scheduling overhead.
-    tokio::spawn(async move {
+    actix_web::rt::spawn(async move {
         loop {
             tokio::select! {
                 // Outbound branch: Listen to internal MPSC channel and push text to client
