@@ -1,6 +1,4 @@
-use fr_rust::prelude::{
-    *
-};
+use fr_rust::prelude::*;
 use actix_web::{web::Data as AppData, post, web::Json};
 use serde::{Serialize, Deserialize};
 

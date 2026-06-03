@@ -27,3 +27,6 @@ tokio = { version = "1.52", features = ["full"] }
 # Serialization / JSON handling
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Redis Management
+deadpool-redis = "0.23"

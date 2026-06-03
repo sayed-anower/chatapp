@@ -93,8 +93,7 @@ async fn ws_handler(
 
     // 3. Optimized Single Task Execution Loop
     // Merging inbound and outbound handling prevents spawning 2 tasks per user, saving memory and CPU scheduling overhead.
-    // Use spawn_local instead of spawn since MessageStream is not Send
-    actix_web::rt::spawn(async move {
+    tokio::spawn(async move {
         loop {
             tokio::select! {
                 // Outbound branch: Listen to internal MPSC channel and push text to client
