@@ -1,10 +1,6 @@
-use fr_rust::prelude::{
-    *, 
-};
 use actix_web::web::ServiceConfig;
 use crate::{
     routes::{
-        index_file,
         signup,
         login,
         forgotten_pwd,
@@ -14,6 +10,7 @@ use crate::{
     },
 };
 use crate::ws::ws_handler::ws_handler;
+use crate::routes::index::index_file;
 
 // App Configuration
 pub fn app_config(cfg: &mut ServiceConfig) {

@@ -68,7 +68,7 @@ fn cleanup_user(ws_manager: &WsManager, user_id: &str) {
 #[get("/ws/{user_id}")]
 async fn ws_handler(
     req: Rqs,
-    body: Payload,
+    body: web::Payload,
     ws_manager: web::Data<WsManager>,
     path: Path<String>,
 ) -> Rsp {
