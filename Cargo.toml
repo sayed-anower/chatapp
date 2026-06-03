@@ -14,3 +14,14 @@ strip = true
 
 [dependencies]
 fr-rust = { git = "https://github.com/sayed-anower/fr-rust" }
+# Actix ecosystem
+actix-web = "4.13"
+actix-ws = "0.4"
+
+# Async & Concurrency tools
+futures-util = "0.3"
+tokio = { version = "1.52", features = ["full"] }
+
+# Serialization / JSON handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

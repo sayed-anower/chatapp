@@ -1,8 +1,9 @@
 use fr_rust::prelude::{
-    *, AppData, post, Json,
-    Deserialize, Serialize,
-    RedisAsyncCommands, 
+    *, 
+    redis::AsyncCommands
 };
+use actix_web::{web::Data as AppData, post, Json};
+use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ChangePwd {

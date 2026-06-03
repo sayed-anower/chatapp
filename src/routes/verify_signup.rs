@@ -1,10 +1,10 @@
 use fr_rust::prelude::{
-    *, AppData, post, Json,
-    Deserialize, Serialize,
-    RedisAsyncCommands, 
+    *, 
+    redis::AsyncCommands
 };
+use actix_web::{web::Data as AppData, post, Json};
+use serde::{Serialize, Deserialize};
 use crate::routes::TempSignup;
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {
     pub email: String,

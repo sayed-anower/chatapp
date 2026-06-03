@@ -1,5 +1,8 @@
 use fr_rust::prelude::{
-    *, App, HttpServer, AppData
+    *, 
+};
+use actix_web::{
+    App, HttpServer, web::Data as AppData
 };
 use chatapp::app_config;
 #[fr_rust::main]

@@ -1,8 +1,9 @@
 use fr_rust::prelude::{
-    *, AppData, post, Json,
-    Deserialize, Serialize,
-    RedisAsyncCommands, 
+    *, 
+    redis::AsyncCommands
 };
+use actix_web::{web::Data as AppData, post, Json};
+use serde::{Serialize, Deserialize};
 // Import the struct
 use crate::routes::forgotten_pwd::ForgottenPwd; 
 

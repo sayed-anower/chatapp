@@ -1,6 +1,7 @@
 use fr_rust::prelude::{
-    *, ServiceConfig
+    *, 
 };
+use actix_web::web::ServiceConfig;
 use crate::{
     routes::{
         index_file,
