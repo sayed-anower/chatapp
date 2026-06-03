@@ -11,9 +11,12 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+codegen-units = 1
 
 [dependencies]
 fr-rust = { git = "https://github.com/sayed-anower/fr-rust" }
+# fr-rust = "0.1"
+
 # Actix ecosystem
 actix-web = "4.13"
 actix-ws = "0.4"
