@@ -2,7 +2,6 @@ use fr_rust::prelude::{
     *, App, HttpServer, AppData
 };
 use chatapp::app_config;
-
 #[fr_rust::main]
 async fn main() -> MainRlt {
     // Load environment variables
