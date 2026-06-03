@@ -1,13 +1,9 @@
-use fr_rust::prelude::*;
-use fr_rust::redis::AsyncCommands;
-use actix_web::{post, web::{
-    Data as AppData,
-    Json
-}
+use fr_rust::prelude::{
+    *, AppData, post, Json,
+    Deserialize, Serialize,
+    RedisAsyncCommands, 
 };
 use crate::routes::TempSignup;
-use serde::{Deserialize, Serialize};
-use futures_util::StreamExt; 
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {

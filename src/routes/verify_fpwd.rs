@@ -1,11 +1,10 @@
-use fr_rust::prelude::*;
-use fr_rust::redis::AsyncCommands;
-use actix_web::{post, web::{Data as AppData, Json}};
-use serde::{Deserialize, Serialize};
-
-// Import the struct from your original route file
+use fr_rust::prelude::{
+    *, AppData, post, Json,
+    Deserialize, Serialize,
+    RedisAsyncCommands, 
+};
+// Import the struct
 use crate::routes::forgotten_pwd::ForgottenPwd; 
-
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct VerifyOtp {

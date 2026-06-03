@@ -1,25 +1,13 @@
-use fr_rust::prelude::*;
+use fr_rust::prelude::{
+    *, App, HttpServer, AppData
+};
 use chatapp::app_config;
-use actix_web::{get, web, App, HttpServer};
-use actix_web::web::Data as AppData;
 
 #[fr_rust::main]
 async fn main() -> MainRlt {
     // Load environment variables
     load_env();
     /* SHARED STATES */
-    // DDoS Shield
-    let ddos_shield = DdosShield::builder()
-    // max requests per 1 sec
-        .max_requests(5)
-    // Per 1 sec
-        .window_secs(1)
-        .ban_duration_secs(20)
-        .block_agent("malicious-bot")
-        .allow_missing_ua(false)
-        .build();
-    // JWT
-    let jwt = Jwt::new();
     // Email
     let email_config = EmailConfig {
         smtp_host: env_var("SMTP_HOST"),
@@ -50,14 +38,6 @@ async fn main() -> MainRlt {
         ttl_secs: 300 
     };
     let otp_service = OtpService::new(otp_config);
-    // Link verification
-    let linkv_config = LinkVConfig {
-        secret: env_var("KEY"),
-        crypto: crypto_service.clone(),
-        redis: redis.clone(),
-        ttl_secs: 300 
-    };
-    let linkv_service = LinkV::new(linkv_config);
     // Web Socket
     let ws_config = WsConfig {
         server: 1,
@@ -76,10 +56,7 @@ async fn main() -> MainRlt {
     .app_data(AppData::new(redis.clone()))
     .app_data(AppData::new(crypto_service.clone()))
     .app_data(AppData::new(otp_service.clone()))
-    .app_data(AppData::new(linkv_service.clone()))
-    .app_data(AppData::new(jwt.clone()))
     .app_data(AppData::new(ws.clone()))
     .configure(app_config)
-    .wrap(ddos_shield.clone())
     ).bind(address)?.run().await
 }

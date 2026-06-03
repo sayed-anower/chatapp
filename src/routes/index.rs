@@ -1,8 +1,8 @@
 use fr_rust::prelude::{
     FileRlt,
-    send_file
+    send_file,
+    get
 };
-use actix_web::{get};
 
 #[get("/")]
 pub async fn index_file() -> FileRlt {

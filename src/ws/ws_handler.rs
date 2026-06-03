@@ -1,16 +1,10 @@
-
-use fr_rust::prelude::*;
-use actix_web::{get, web};
-use actix_web::web::Path; 
-
-use ::actix_ws::{Message, Session, MessageStream}; 
-
-use futures_util::StreamExt; 
-
-use tokio::sync::mpsc; 
-use tokio::time::Instant; 
-
-use serde::{Deserialize, Serialize};
+use fr_rust::prelude::{
+    *, get, web, Path,
+    actix_ws::{Message, Session, MessageStream},
+    StreamExt, tokio::sync::mpsc,
+    tokio::time::Instant, 
+    Deserialize, Serialize
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "action", rename_all = "snake_case")]
@@ -65,7 +59,6 @@ async fn handle_client_command(
 /// Centralized cleanup function when a user drops connection
 fn cleanup_user(ws_manager: &WsManager, user_id: &str) {
     println!("Cleaning up connection for user: {}", user_id);
-    // Explicitly drops the user and cleans up allocations from internal states/maps
     ws_manager.drop_user(user_id);
 }
 
@@ -97,7 +90,7 @@ async fn ws_handler(
 
     let ws_manager_inbound = ws_manager.clone();
     let user_id_inbound = user_id.clone();
-    let mut session_inbound = session.clone(); // Cloned so 'session' ownership isn't lost
+    let mut session_inbound = session.clone();
 
     // Task 1: Outbound Loop (Listen to the mpsc channel and push to the WS client)
     tokio::spawn(async move {

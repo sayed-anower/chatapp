@@ -1,5 +1,6 @@
-use fr_rust::prelude::*;
-use actix_web::{web};
+use fr_rust::prelude::{
+    *, ServiceConfig
+};
 use crate::{
     routes::{
         index_file,
@@ -14,7 +15,7 @@ use crate::{
 use crate::ws::ws_handler::ws_handler;
 
 // App Configuration
-pub fn app_config(cfg: &mut web::ServiceConfig) {
+pub fn app_config(cfg: &mut ServiceConfig) {
     cfg
        .service(index_file)
        .service(signup)

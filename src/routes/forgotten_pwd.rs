@@ -1,7 +1,8 @@
-use fr_rust::prelude::*;
-use fr_rust::redis::AsyncCommands;
-use actix_web::{post, web::{Data as AppData, Json}};
-use serde::{Deserialize, Serialize};
+use fr_rust::prelude::{
+    *, AppData, post, Json,
+    Deserialize, Serialize,
+    RedisAsyncCommands, 
+};
 
 // Assuming these come from your internal crates/modules
 use crate::{

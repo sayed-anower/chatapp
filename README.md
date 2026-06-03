@@ -1,4 +1,4 @@
-# 🚀 Chat Server Powered By FR-RUST 
+# 🚀 Chat Server Powered By FR-RUST
 
 A high-performance, horizontally scalable real-time chat application built in Rust. Powered by the `fr-rust` framework, this system is designed to efficiently handle thousands of concurrent WebSocket connections across multiple distributed servers.
 
