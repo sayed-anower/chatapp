@@ -2,12 +2,15 @@
 name = "chatapp"
 version = "0.1.0"
 edition = "2024"
+authors = ["Sayed Anower <sayed.anower.17.2@gmail.com>"]
+readme = "README.md"
+
+[profile.release]
+opt-level = "z" 
+lto = true 
+codegen-units = 1
+panic = "abort"
+strip = true
 
 [dependencies]
-fr-rust = { version = "0.1.0", git = "https://github.com/sayed-anower/fr-rust", branch = "main" }
-actix-web = "4.13"
-actix-ws = "0.4"
-futures-util = "0.3"
-tokio = { version = "1.52", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
- serde_json = "1.0"
+fr-rust = { git = "https://github.com/sayed-anower/fr-rust" }
