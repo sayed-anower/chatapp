@@ -33,7 +33,7 @@ pub async fn verify_otp_route(
 ) -> Rsp {
 
     // Verify OTP explicitly against stored Redis backplane criteria
-    match otp_service.verify_otp(&payload.key, &payload.otp, 300).await {
+    match otp_service.verify_otp(&payload.key, &payload.otp).await {
         Ok(true) => {
             // Generate standard login JWT payload
             match jwt.generate_token(&payload.key) {
@@ -60,16 +60,13 @@ pub async fn verify_route(
     jwt: AppData<Jwt>,
 ) -> Rsp {
     // 1. Get the real user
-    let target_user = match jwt.parse_token(&query.v) {
-        Ok(u) => u,
-        _ => http_bad("Failed to parse user!")
-    }; 
+    let target_user = jwt.parse_token(&query.v).unwrap_or_else(|_| return http_bad("Failed to parse user!"));
 
     // Validate link token
     match linkv_service.verify_token(query.v, 300) {
         Ok(true) => {
             // Generate standard login JWT payload (No expiration per framework docs example)
-            match jwt.generate_token(target_user) {
+            match jwt.generate_token(target_user.sub) {
                 Ok(token) => http_ok_json(json!({
                     "success": true,
                     "message": "Logged in successfully",
@@ -94,17 +91,17 @@ pub async fn verify_two_route(
     // 1. Get the real user
     let target_user = jwt.parse_token(&query.v).unwrap_or_else(|_| return http_bad("Failed to parse user!"));
     // 2. Validate the link token
-    match linkv_service.verify_token(&query.v, 300) {
+    match linkv_service.verify_token(&query.vlinkv_service.verify_token(&query.v, 300)) {
         Ok(true) => {
             // 3. Link verified! Now generate a 6-digit OTP
-            let otp = match otp_service.generate_otp(target_user, 6, 300).await {
+            let otp = match otp_service.generate_otp(target_user.sub, 6, 300).await {
                 Ok(code) => code,
                 Err(_) => return http_bad("Failed to initialize secondary verification code."),
             };
 
             // 4. Send the OTP via Email
             let email_data = EmailData {
-                to: target_user.to_string(),
+                to: target_user.sub.to_string(),
                 subject: "Your Verification Code".to_string(),
                 body: format!("Your secure OTP code is: {}. It expires in 5 minutes.", otp),
             };
@@ -127,7 +124,7 @@ pub async fn verify_two_route(
                     </form>
                 </body>
                 </html>"#, 
-                target_user
+                target_user.sub
             );
             
             send_str(&html_page)
