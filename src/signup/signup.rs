@@ -1,4 +1,5 @@
 use fr_rust::prelude::*;
+use crate::utils::if_user_exist;
 use actix_web::{post, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
@@ -86,7 +87,7 @@ pub async fn signup3(
         return http_bad("User already exists with this email.");
     }
 
-    let token = linkv_service.generate_token(&data.email).await.unwrap();
+    let token = linkv_service.generate_token(&data.email, 300).unwrap();
     let hashed_pwd = crypto.hash_data(&data.pwd).await.unwrap();
     
     let temp_user = TempSignup {
@@ -128,7 +129,7 @@ pub async fn signup4 (
         return http_bad("User already exists with this email.");
     }
 
-    let token = linkv_service.generate_token(&data.email).await.unwrap();
+    let token = linkv_service.generate_token(&data.email, 300).unwrap();
     let hashed_pwd = crypto.hash_data(&data.pwd).await.unwrap();
     
     let temp_user = TempSignup {

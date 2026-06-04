@@ -1,6 +1,6 @@
 use fr_rust::prelude::*;
 use actix_web::{get, post, web, web::Data as AppData};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use serde_json::{
     json,
 };
@@ -68,7 +68,7 @@ pub async fn verify_route(
     let secret = env_var_or_default("JWT_SECRET", "my_ultra_secure_secret_key_2026");
 
     // Validate link token
-    match linkv_service.verify_token(query.v).await {
+    match linkv_service.verify_token(query.v, 300) {
         Ok(true) => {
             // Generate standard login JWT payload (No expiration per framework docs example)
             match jwt.generate_token(target_user, &secret) {
@@ -94,12 +94,9 @@ pub async fn verify_two_route(
     jwt: AppData<Jwt>,
 ) -> Rsp {
     // 1. Get the real user
-    let target_user = match jwt.parse_token(&query.v) {
-        Ok(u) => u,
-        _ => http_bad("Failed to parse user!")
-    };
+    let target_user = jwt.parse_token(&query.v).unwrap_or_else(|_| return http_bad("Failed to parse user!"));
     // 2. Validate the link token
-    match linkv_service.verify_token(&query.v).await {
+    match linkv_service.verify_token(&query.v, 300) {
         Ok(true) => {
             // 3. Link verified! Now generate a 6-digit OTP
             let otp = match otp_service.generate_otp(target_user, 6, 300).await {
@@ -109,7 +106,7 @@ pub async fn verify_two_route(
 
             // 4. Send the OTP via Email
             let email_data = EmailData {
-                to: target_email.to_string(),
+                to: target_user.to_string(),
                 subject: "Your Verification Code".to_string(),
                 body: format!("Your secure OTP code is: {}. It expires in 5 minutes.", otp),
             };

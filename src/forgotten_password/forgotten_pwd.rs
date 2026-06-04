@@ -1,5 +1,5 @@
 use fr_rust::prelude::*;
-use actix_web::{post, web, web::Json, web::Data as AppData};
+use actix_web::{post, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::Deserialize;
 
@@ -66,7 +66,7 @@ pub async fn forgotten_password_3(
     let data = payload.into_inner();
 
     // Generate link tracking token
-    let token = linkv_service.generate_token(&data.email).await.unwrap();
+    let token = linkv_service.generate_token(&data.email, 300).unwrap();
     let hashed_new_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
 
     // Stash the hash update into Redis cache
@@ -96,7 +96,7 @@ pub async fn forgotten_password_4(
     let data = payload.into_inner();
 
     // Generate link tracking token
-    let token = linkv_service.generate_token(&data.email).await.unwrap();
+    let token = linkv_service.generate_token(&data.email, 300).unwrap();
     let hashed_new_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
 
     // Stash the hash update into Redis cache

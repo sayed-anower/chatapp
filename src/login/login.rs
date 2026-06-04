@@ -1,6 +1,5 @@
 use fr_rust::prelude::*;
 use actix_web::{post, web::Json, web::Data as AppData};
-use deadpool_redis::redis::AsyncCommands;
 use serde::{Deserialize};
 use serde_json::{
     json,
@@ -92,7 +91,7 @@ pub async fn login3(
             
             match crypto.verify_hash(&credentials.pwd, &db_hash).await {
                 Ok(true) => {
-                    let token = linkv_service.generate_token(&credentials.email).await.unwrap();
+                    let token = linkv_service.generate_token(&credentials.email, 300).unwrap();
                     let magic_link = format!("https://example.com/verify?v={}", token);
                     
                     let email_payload = EmailData {
@@ -128,7 +127,7 @@ pub async fn login4 (
             
             match crypto.verify_hash(&credentials.pwd, &db_hash).await {
                 Ok(true) => {
-                    let token = linkv_service.generate_token(&credentials.email).await.unwrap();
+                    let token = linkv_service.generate_token(&credentials.email, 300).unwrap();
                     let magic_link = format!("https://example.com/verify-two?v={}", token);
                     
                     let email_payload = EmailData {

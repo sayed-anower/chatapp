@@ -1,5 +1,5 @@
 use fr_rust::prelude::*;
-use actix_web::{post, web, web::Json, web::Data as AppData};
+use actix_web::{post, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::Deserialize;
 
@@ -104,7 +104,7 @@ pub async fn change_password_3(
 
             match crypto.verify_hash(&data.old_pwd, &db_hash).await {
                 Ok(true) => {
-                    let token = linkv_service.generate_token(&data.email).await.unwrap();
+                    let token = linkv_service.generate_token(&data.email, 300).unwrap();
                     let hashed_new_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
 
                     let mut conn = redis.get_connection().await.expect("Redis Failed!");
@@ -147,7 +147,7 @@ pub async fn change_password_4(
 
             match crypto.verify_hash(&data.old_pwd, &db_hash).await {
                 Ok(true) => {
-                    let token = linkv_service.generate_token(&data.email).await.unwrap();
+                    let token = linkv_service.generate_token(&data.email, 300).unwrap();
                     let hashed_new_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
 
                     let mut conn = redis.get_connection().await.expect("Redis Failed!");
