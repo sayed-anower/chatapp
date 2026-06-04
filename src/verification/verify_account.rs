@@ -63,7 +63,7 @@ pub async fn verify_route(
     let target_user = jwt.parse_token(&query.v).unwrap();
 
     // Validate link token
-    match linkv_service.verify_token(query.v) {
+    match linkv_service.verify_token(&query.v) {
         Ok(true) => {
             // Generate standard login JWT payload (No expiration per framework docs example)
             match jwt.generate_token(&target_user.sub) {
@@ -91,7 +91,7 @@ pub async fn verify_two_route(
     // 1. Get the real user
     let target_user = jwt.parse_token(&query.v).unwrap();
     // 2. Validate the link token
-    match linkv_service.verify_token(&query.vlinkv_service.verify_token(&query.v)) {
+    match linkv_service.verify_token(&query.v) {
         Ok(true) => {
             // 3. Link verified! Now generate a 6-digit OTP
             let otp = match otp_service.generate_otp(&target_user.sub, 6, 300).await {
