@@ -13,4 +13,5 @@ pub use crate::verification::verify_account::*;
 pub use crate::ws::ws_handler::*;
 
 /* Index File */
-pub use crate::index::*;
+pub mod index;
+pub use crate::index::index_file;
