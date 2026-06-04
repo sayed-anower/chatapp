@@ -49,6 +49,7 @@ async fn main() -> MainRlt {
         secret: env_var("KEY"),
         crypto: crypto_service.clone(),
         redis: redis.clone(),
+        jwt: jwt.clone()
     });
     
     let ws = WsManager::new(WsConfig { server: 1, redis: redis.clone() });

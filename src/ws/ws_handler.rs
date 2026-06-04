@@ -79,7 +79,7 @@ async fn ws_handler(
 
     // Perform WebSocket handshake
     let (_res, mut session, mut msg_stream) = match actix_ws::handle(&req, body) {
-        Ok(tuple) => tuple,
+        Ok(res) => res,
         Err(_) => return http_bad("Internal Server Error!"), 
     };
 
