@@ -10,7 +10,7 @@ use actix_web::web::ServiceConfig;
     },
 };*/
 use crate::{
-    ws::ws_handler
+    routes::ws_handler
 };
 use crate::routes::index_file;
 

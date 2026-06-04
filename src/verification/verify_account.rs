@@ -31,13 +31,12 @@ pub async fn verify_otp_route(
     otp_service: AppData<OtpService>,
     jwt: AppData<Jwt>,
 ) -> Rsp {
-    let secret = env_var_or_default("JWT_SECRET", "my_ultra_secure_secret_key_2026");
 
     // Verify OTP explicitly against stored Redis backplane criteria
     match otp_service.verify_otp(&payload.key, &payload.otp, 300).await {
         Ok(true) => {
             // Generate standard login JWT payload
-            match jwt.generate_token(&payload.key, &secret) {
+            match jwt.generate_token(&payload.key) {
                 Ok(token) => http_ok_json(json!({
                     "success": true,
                     "message": "OTP verification successful.",
@@ -65,13 +64,12 @@ pub async fn verify_route(
         Ok(u) => u,
         _ => http_bad("Failed to parse user!")
     }; 
-    let secret = env_var_or_default("JWT_SECRET", "my_ultra_secure_secret_key_2026");
 
     // Validate link token
     match linkv_service.verify_token(query.v, 300) {
         Ok(true) => {
             // Generate standard login JWT payload (No expiration per framework docs example)
-            match jwt.generate_token(target_user, &secret) {
+            match jwt.generate_token(target_user) {
                 Ok(token) => http_ok_json(json!({
                     "success": true,
                     "message": "Logged in successfully",

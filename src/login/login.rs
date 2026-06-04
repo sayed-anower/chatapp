@@ -19,7 +19,6 @@ pub async fn login(
     payload: Json<LoginPayload>,
 ) -> Rsp {
     let credentials = payload.into_inner();
-    let secret = env_var_or_default("JWT_SECRET", "my_ultra_secure_secret_key_2026");
 
     let query = "SELECT password FROM users WHERE email = $1 LIMIT 1;";
     match pool.query_opt(query, &[&credentials.email]).await {
@@ -29,7 +28,7 @@ pub async fn login(
             // Securely evaluate argon2/bcrypt hash match asynchronously
             match crypto.verify_hash(&credentials.pwd, &db_hash).await {
                 Ok(true) => {
-                    let token = jwt.generate_token(&credentials.email, &secret).unwrap();
+                    let token = jwt.generate_token(&credentials.email).unwrap();
                     http_ok_json(json!({ "token": token, "message": "Login complete" }))
                 },
                 _ => http_bad("Invalid credentials structural validation."),
