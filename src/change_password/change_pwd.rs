@@ -1,3 +1,4 @@
+use fr_rust::prelude::*;
 use actix_web::{post, web, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::Deserialize;
@@ -61,7 +62,7 @@ pub async fn change_password_2(
             match crypto.verify_hash(&data.old_pwd, &db_hash).await {
                 Ok(true) => {
                     // Generate OTP and Hash the upcoming new password
-                    let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
+                    let otp = otp_service.generate_otp(&data.email, 6, 300).await.unwrap();
                     let hashed_new_pwd = crypto.hash_data(&data.new_pwd).await.unwrap();
 
                     // Temporarily hold the hashed update in Redis cache for 5 mins

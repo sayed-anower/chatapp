@@ -1,3 +1,4 @@
+use fr_rust::prelude::*;
 use actix_web::{post, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
@@ -45,7 +46,7 @@ pub async fn signup2(
         return http_bad("User already exists with this email.");
     }
 
-    let otp = otp_service.generate_otp(&data.email, 6).await.unwrap();
+    let otp = otp_service.generate_otp(&data.email, 6, 300).await.unwrap();
     let hashed_pwd = crypto.hash_data(&data.pwd).await.unwrap();
     
     let temp_user = TempSignup {

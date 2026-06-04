@@ -34,7 +34,7 @@ pub async fn verify_otp_route(
     let secret = env_var_or_default("JWT_SECRET", "my_ultra_secure_secret_key_2026");
 
     // Verify OTP explicitly against stored Redis backplane criteria
-    match otp_service.verify_otp(&payload.key, &payload.otp).await {
+    match otp_service.verify_otp(&payload.key, &payload.otp, 300).await {
         Ok(true) => {
             // Generate standard login JWT payload
             match jwt.generate_token(&payload.key, &secret) {
@@ -102,7 +102,7 @@ pub async fn verify_two_route(
     match linkv_service.verify_token(&query.v).await {
         Ok(true) => {
             // 3. Link verified! Now generate a 6-digit OTP
-            let otp = match otp_service.generate_otp(target_user, 6).await {
+            let otp = match otp_service.generate_otp(target_user, 6, 300).await {
                 Ok(code) => code,
                 Err(_) => return http_bad("Failed to initialize secondary verification code."),
             };

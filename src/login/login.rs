@@ -1,3 +1,4 @@
+use fr_rust::prelude::*;
 use actix_web::{post, web::Json, web::Data as AppData};
 use deadpool_redis::redis::AsyncCommands;
 use serde::{Deserialize};
@@ -56,7 +57,7 @@ pub async fn login2(
             match crypto.verify_hash(&credentials.pwd, &db_hash).await {
                 Ok(true) => {
                 // Generate secondary OTP challenge verification block
-                    let otp = otp_service.generate_otp(&credentials.email, 6).await.unwrap();
+                    let otp = otp_service.generate_otp(&credentials.email, 6, 300).await.unwrap();
                     
                     let email_payload = EmailData {
                         to: credentials.email,

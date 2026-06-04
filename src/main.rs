@@ -1,6 +1,4 @@
-use fr_rust::prelude::{
-    *, 
-};
+use fr_rust::prelude::*;
 use actix_web::{
     App, HttpServer, web::Data as AppData
 };
