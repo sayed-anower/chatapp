@@ -3,3 +3,5 @@
 !.env.example
 Cargo.lock
 err.rs
+.fundamentals.md
+test.rs

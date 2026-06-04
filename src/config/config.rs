@@ -1,5 +1,5 @@
 use actix_web::web::ServiceConfig;
-use crate::{
+/* use crate::{
     routes::{
         signup,
         login,
@@ -8,19 +8,21 @@ use crate::{
         change_pwd,
         verify_signup
     },
+};*/
+use crate::{
+    ws::ws_handler
 };
-use crate::ws::ws_handler::ws_handler;
-use crate::routes::index::index_file;
+use crate::routes::index_file;
 
 // App Configuration
 pub fn app_config(cfg: &mut ServiceConfig) {
     cfg
        .service(index_file)
-       .service(signup)
+       /*.service(signup)
        .service(verify_signup)
        .service(login)
        .service(forgotten_pwd)
        .service(verify_fpwd)
-       .service(change_pwd)
+       .service(change_pwd)*/
        .service(ws_handler);
 }
