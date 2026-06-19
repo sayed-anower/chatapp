@@ -13,7 +13,7 @@ strip = true
 codegen-units = 1
 
 [dependencies]
-fr-rust = "0.1.6"
+fr-rust = "0.1.5"
 
 # Actix ecosystem
 actix-web = "4.13"
